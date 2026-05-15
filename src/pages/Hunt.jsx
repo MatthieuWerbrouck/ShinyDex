@@ -1,11 +1,29 @@
 import { useState } from 'react'
 import { useHunts } from '../hooks/useHunts'
+import { useProjects } from '../hooks/useProjects'
 import HuntCard from '../components/HuntCard'
 import StartHuntModal from '../components/StartHuntModal'
 
 export default function Hunt() {
   const { hunts, startHunt, increment, decrement, catchShiny, abandon } = useHunts()
+  const { markCaught } = useProjects()
   const [showModal, setShowModal] = useState(false)
+
+  function handleCatch(huntId) {
+    const hunt = hunts.find(h => h.id === huntId)
+    if (hunt?.projectId) {
+      markCaught(hunt.projectId, {
+        pokemonId: hunt.pokemonId,
+        pokemonName: hunt.pokemonName,
+        pokemonSprite: hunt.pokemonSprite,
+        method: hunt.method,
+        game: hunt.game,
+        count: hunt.count,
+        caughtBy: 'Moi',
+      })
+    }
+    catchShiny(huntId)
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -33,7 +51,7 @@ export default function Hunt() {
               hunt={hunt}
               onIncrement={increment}
               onDecrement={decrement}
-              onCatch={catchShiny}
+              onCatch={handleCatch}
               onAbandon={abandon}
             />
           ))}
@@ -41,10 +59,7 @@ export default function Hunt() {
       )}
 
       {showModal && (
-        <StartHuntModal
-          onStart={startHunt}
-          onClose={() => setShowModal(false)}
-        />
+        <StartHuntModal onStart={startHunt} onClose={() => setShowModal(false)} />
       )}
     </div>
   )
